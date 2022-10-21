@@ -1,4 +1,5 @@
 import time
+import random
 import matplotlib.pyplot as plt
 from autograd import grad
 from matplotlib.scale import LogScale
@@ -33,9 +34,7 @@ def gradientDescent(f, x0, lengthFactor, maxSteps):
     for i in range(maxSteps):
         # start = time.time()
         gradValue = gradFunc(old_x)
-        new_x = []
-        for j, value in enumerate(old_x):
-            new_x.append(value - (lengthFactor * gradValue[j]))
+        new_x = old_x - gradValue * lengthFactor
         #if np.linalg.norm(gradValue) <= lengthFactor:
         #    return f.returnValue(new_x)
         if f.returnValue(new_x) >= f.returnValue(old_x):
@@ -44,21 +43,22 @@ def gradientDescent(f, x0, lengthFactor, maxSteps):
             old_x = new_x
         # end = time.time()
         iterationTimes.append(f.returnValue(new_x))
-        # print(f.returnValue(new_x))
+        print(f.returnValue(new_x))
     return f.returnValue(new_x), iterationTimes    
 
 if __name__ == "__main__":
     # lengthFactor should be very small
     maxSteps = 1000
+    lengthFactor = 0.001
     iterations = [i for i in range(1, maxSteps + 1)]
 
     for i in [1, 10, 100]:
         labFunc = LabFunc(i, 10)
-        for lengthFactor in [1, 2, 3]:
-            minimum, iterationTimes = gradientDescent(labFunc, np.array([100.0, 30.0, 30.0, 40.0, 50.0, 60.0, -50.0, -70.0, -39.0, -10.0]), float(lengthFactor), maxSteps)
-            plt.plot(iterations, iterationTimes, label=f"alpha = {i}, length factor = {lengthFactor}")
+        minimum, iterationTimes = gradientDescent(labFunc, np.array([1.0, 2.0, 3.0, 4.0, 5.0, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0]), float(lengthFactor), maxSteps)
+        plt.plot(iterations, iterationTimes, label=f"alpha = {i}, length factor = {lengthFactor}")
     
-    plt.yscale('log')
+    
+    # plt.yscale('log')
     plt.xlabel("t")
     plt.ylabel("q(x)")
     plt.title("Values of q(x) over iterations")
