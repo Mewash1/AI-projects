@@ -1,3 +1,4 @@
+import time
 import matplotlib.pyplot as plt
 from autograd import grad
 from autograd import numpy as np
@@ -30,25 +31,39 @@ def gradientDescent(f, x0, lengthFactor, maxSteps):
         else:
             old_x = new_x
             old_value = f.returnValue(old_x)
-            localLengthFactor = lengthFactor
         iterationValues.append(old_value)
     return f.returnValue(new_x), iterationValues    
 
 if __name__ == "__main__":
-    maxSteps = 100
-    iterations = range(maxSteps + 1)
+
     if not os.path.isdir("graphs"):
         os.makedirs("graphs")
-    for lengthFactor in [0.01, 0.1, 1, 10]:
-        fig, ax = plt.subplots(dpi=300)
-        for alpha in [1, 5, 10, 50, 100]:
+
+    maxSteps = 10000
+    alphaValues = [1, 5, 10, 50, 100]
+    lengthFactors = [0.01, 0.1, 1.0, 10.0]
+    
+    for lengthFactor in lengthFactors:
+        fig1, (ax1, ax2) = plt.subplots(2, figsize=(12,6), dpi=300)
+        fig1.tight_layout(pad=3.0)
+        alphaTimes = []
+        for alpha in alphaValues:
             labFunc = LabFunc(alpha, 10)
-            minimum, iterationTimes = gradientDescent(labFunc, np.array([10.0, 20.0, 30.0, 40.0, 50.0, 10.0, 20.0, 30.0, 40.0, 50.0]), float(lengthFactor), maxSteps)
-            ax.plot(range(len(iterationTimes)), iterationTimes, label=f"alpha = {alpha}")
-        plt.yscale('log')
-        plt.xlabel("t")
-        plt.ylabel("q(x)")
-        plt.title("Values of q(x) over iterations")
-        plt.legend()
-        fig.savefig(f"graphs/lengthFactor={lengthFactor}.jpg")
-    #plt.show()
+            start = time.time()
+            minimum, iterationValues = gradientDescent(labFunc, np.array([10.0, 20.0, 30.0, 40.0, 50.0, 10.0, 20.0, 30.0, 40.0, 50.0]), lengthFactor, maxSteps)
+            end = time.time()
+            ax1.plot(range(len(iterationValues)), iterationValues, label=f"alpha = {alpha}")
+            alphaTimes.append((alpha, end - start))
+        ax2.plot([value[0] for value in alphaTimes], [value[1] for value in alphaTimes])
+        
+        ax1.set_yscale('log')
+        ax1.set_xlabel("t")
+        ax1.set_ylabel("q(x)")
+        ax1.set_title("Values of q(x) over iterations")
+        ax1.legend()
+
+        ax2.set_xlabel("alpha")
+        ax2.set_ylabel("time (seconds)")
+        ax2.set_xscale("log")
+        ax2.set_title("Alpha values over time of execution")
+        fig1.savefig(f"graphs/lengthFactor={lengthFactor}.jpg")
