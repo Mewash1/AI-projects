@@ -1,7 +1,5 @@
-from cec2017.functions import f1, f9
 import numpy as np
 import random
-import matplotlib.pyplot as plt
 import math
 
 
@@ -60,19 +58,3 @@ def evolution(f, mutationForce, populationSize, reproductionSize, days, dimensio
         populationValues = [specimen[2] for specimen in population]
         bestSpecimens.append(sum(populationValues)/len(populationValues))
     return bestSpecimens
-
-if __name__ == "__main__":
-    f = f1
-    mutationForce = 2
-    populationSize = 100
-    reproductionSize = 200
-    days = 1000
-    dimensions = 10
-    bestSpecimens = evolution(f, mutationForce, populationSize, reproductionSize, days, dimensions)
-
-    for value in bestSpecimens:
-        print(value)
-
-    plt.yscale("log")
-    plt.plot(range(len(bestSpecimens)), bestSpecimens)
-    plt.show()

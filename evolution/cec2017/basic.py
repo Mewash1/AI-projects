@@ -2,7 +2,7 @@
 # Author: Duncan Tilley
 # Basic function definitions
 
-import numpy as np
+import autograd.numpy as np
 
 def bent_cigar(x):
     sm = 0.0
