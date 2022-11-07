@@ -6,13 +6,13 @@ import numpy as np
 import os
 
 testFunctions = [("f1", f1), ("f9", f9)]
-mutationForce = 2
+mutationForce = 10
 populationSize = 100
 reproductionSize = 200
-days = 500
+days = 1000
 dimensions = 10
 initialCoords = np.array([10.0, 20.0, 30.0, 40.0, 50.0, 10.0, 20.0, 30.0, 40.0, 50.0])
-lengthFactor = 1
+lengthFactor = 0.01
 
 if not os.path.isdir("cecGraphs"):
     os.makedirs("cecGraphs")
@@ -30,3 +30,4 @@ for fTuple in testFunctions:
     ax.legend()
     ax.set_title(f"Minimal value of {name}")
     fig.savefig(f"cecGraphs/{name}")
+    plt.show()
