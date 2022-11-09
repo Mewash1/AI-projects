@@ -24,14 +24,14 @@ def gradientDescent(f, x0, lengthFactor, maxSteps):
         gradValue = gradFunc(old_x)
         new_x = old_x - (gradValue * localLengthFactor)
         new_value = f(new_x)
-        #if np.linalg.norm(gradValue) <= lengthFactor * 0.1:
-        #    return f(new_x), iterationValues 
+        if np.linalg.norm(gradValue) <= lengthFactor * 0.1:
+            return f(new_x), iterationValues 
         if new_value >= old_value:
             localLengthFactor = localLengthFactor * 0.1
         else:
             old_x = new_x
             old_value = f(old_x)
-            localLengthFactor = lengthFactor
+            # localLengthFactor = lengthFactor
         iterationValues.append(old_value)
     return f(new_x), iterationValues    
 
