@@ -1,26 +1,40 @@
+from itertools import chain
+import copy
+
 class Board:
     def __init__(self):
-        self._board = [[' ', ' ', ' '],
-                       [' ', ' ', ' '],
-                       [' ', ' ', ' ']]
+        self._board = [[0, 0, 0],
+                       [0, 0, 0],
+                       [0, 0, 0],]
     
     def __str__(self):
         boardStr = ""
+        intToSign = {-1:'O', 0:' ', 1: 'X'}
         for row in self._board:
             boardStr += "|"
             for element in row:
-                boardStr += f" {element} |"
+                boardStr += f" {intToSign[element]} |"
             boardStr += "\n"
         return boardStr
     
     def changeSquare(self, y, x, sign):
-        if y not in {0, 1, 2} or x not in {0, 1, 2} or self._board[y][x] != ' ':
+        if y not in {0, 1, 2} or x not in {0, 1, 2} or self._board[y][x] != 0:
             raise IndexError()
         else:
             self._board[y][x] = sign
     
-    def checkWinCondition(self, sign):
-        table = ['X', 'X', 'X'] if sign == 'X' else ['O', 'O', 'O']
+    def isTerminalState(self):
+        if self.checkWinCondition(True) or self.checkWinCondition(False):
+            return True
+        flattenedBoard = list(chain.from_iterable(self._board))
+        # check for draw
+        for square in flattenedBoard:
+            if square == 0:
+                return False
+        return True
+
+    def checkWinCondition(self, maxPlayer):
+        table = [1,1,1] if maxPlayer else [-1,-1,-1]
 
         for i in range(3):
             if [column[i] for column in self._board] == table:
@@ -35,3 +49,53 @@ class Board:
             return True
         
         return False
+    
+    def boardState(self):
+        '''
+        Returns the heuristic value of current Board state. If the board has achieved a victory state,
+        the winning player is awarded 5 points + 1 point for every blank square left, so that an earlier victory
+        is valued higher. \n 
+        '''
+        stateValue = 0
+        squareValues = [3,2,3,2,4,2,3,2,3]
+        flattenedBoard = list(chain.from_iterable(self._board))
+        maxPlayerWins = self.checkWinCondition(True)
+        minPlayerWins = self.checkWinCondition(False)
+
+        if maxPlayerWins:
+            stateValue = 5
+            for square in flattenedBoard:
+                stateValue += 1 if square == 0 else 0
+        elif minPlayerWins:
+            stateValue = -5
+            for square in flattenedBoard:
+                stateValue -= 1 if square == 0 else 0
+        else: # nobody has won yet
+            for i in range(len(flattenedBoard)):
+                stateValue += squareValues[i] * flattenedBoard[i]
+        return stateValue
+    
+    def generateSuccessors(self, maxPlayer : bool):
+        '''
+        Generates all Board objects which are successors to the current Board.
+        '''
+        sign = 1 if maxPlayer else -1
+        successors = []
+        for i in range(3):
+            for j in range(3):
+                if self._board[i][j] == 0:
+                    newBoard = copy.deepcopy(self)
+                    newBoard._board[i][j] = sign
+                    successors.append(newBoard)
+        return successors
+
+    def getCoords(self, valueIndex):
+        '''
+        Returns coords based on valueIndex.
+        '''
+        for i in range(3):
+            for j in range(3):
+                if self._board[i][j] == 0 and valueIndex == 0:
+                    return (i, j) # y, x
+                elif self._board[i][j] == 0 and valueIndex != 0:
+                    valueIndex -= 1
