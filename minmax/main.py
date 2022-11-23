@@ -1,16 +1,25 @@
 from tictactoe.game import Game
 from tictactoe.player import Player
+import pandas as pd
+import dataframe_image as dfi
+
+def runTests():
+    n = 9
+    depthsScores = [[] for _ in range(n)]
+    for searchDepthMax in range (1, n+1):
+        for searchDepthMin in range(1, n+1):
+            player1 = Player(maxPlayer=True, ai=True, name="Max", searchDepth=searchDepthMax)
+            player2 = Player(maxPlayer=False, ai=True, name="Min", searchDepth=searchDepthMin)
+            game = Game(player1, player2)
+            depthsScores[searchDepthMax - 1].append(game.runGame(False, False))
+    df = pd.DataFrame(depthsScores, range(1, n+1), range(1, n+1))
+    dfi.export(df,"results1.png")
+
+def play():
+    player1 = Player(maxPlayer=True, ai=True, name="Max", searchDepth=3)
+    player2 = Player(maxPlayer=False, ai=True, name="Min", searchDepth=5)
+    game = Game(player1, player2)
+    game.runGame()
 
 if __name__ == "__main__":
-    depthsScores = []
-    for searchDepth in [3]:
-        player1 = Player(maxPlayer=True, ai=True, name="Max", searchDepth=searchDepth)
-        player2 = Player(maxPlayer=False, ai=False, name="Min", searchDepth=searchDepth)
-
-        game = Game(player1, player2)
-        depthsScores.append((searchDepth, game.runGame(False, False)))
-    print(depthsScores)
-
-
-# [(1, 1), (2, 2), (3, 1), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2)]
-# [(1, 1), (2, 2), (3, 1), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2)]
+    play()

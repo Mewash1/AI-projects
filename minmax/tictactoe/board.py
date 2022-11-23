@@ -51,11 +51,6 @@ class Board:
         return False
     
     def boardState(self):
-        '''
-        Returns the heuristic value of current Board state. If the board has achieved a victory state,
-        the winning player is awarded 5 points + 1 point for every blank square left, so that an earlier victory
-        is valued higher. \n 
-        '''
         stateValue = 0
         squareValues = [3,2,3,2,4,2,3,2,3]
         flattenedBoard = list(chain.from_iterable(self._board))
@@ -76,9 +71,6 @@ class Board:
         return stateValue
     
     def generateSuccessors(self, maxPlayer : bool):
-        '''
-        Generates all Board objects which are successors to the current Board.
-        '''
         sign = 1 if maxPlayer else -1
         successors = []
         for i in range(3):
@@ -89,13 +81,10 @@ class Board:
                     successors.append(newBoard)
         return successors
 
-    def getCoords(self, valueIndex):
-        '''
-        Returns coords based on valueIndex.
-        '''
+    def nthEmptySpace(self, n):
         for i in range(3):
             for j in range(3):
-                if self._board[i][j] == 0 and valueIndex == 0:
+                if self._board[i][j] == 0 and n == 0:
                     return (i, j) # y, x
-                elif self._board[i][j] == 0 and valueIndex != 0:
-                    valueIndex -= 1
+                elif self._board[i][j] == 0 and n != 0:
+                    n -= 1

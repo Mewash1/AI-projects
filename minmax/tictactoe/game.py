@@ -1,6 +1,6 @@
 from .board import Board
 from .player import Player
-from .minmax import Minimax
+from .minimax import Minimax
 import click
 
 class Game:
@@ -12,17 +12,31 @@ class Game:
             raise ValueError("Both players cannot be maxPlayer")
 
         self._currentPlayer = self._maxPlayer
-        self._turns = 0
         self._maxPlayer_minimax = Minimax(self._maxPlayer.getSearchDepth())
         self._minPlayer_minimax = Minimax(self._minPlayer.getSearchDepth())
         self._currentPlayer_minimax = self._maxPlayer_minimax
-        self._moves = []
+        self._moves = []    
 
-    def _aiTurn(self):
-        y, x = self._currentPlayer_minimax.minmax(self._currentPlayer.getSearchDepth(), self._board, self._currentPlayer.isMaxPlayer())
-        self._board.changeSquare(y, x, self._currentPlayer.getSign())
-        self._moves.append((x,y))
-    
+    def runGame(self, returnMoves : bool = False):
+        for _ in range(9):
+            self._gameTurn()
+            
+            if self._board.checkWinCondition(self._currentPlayer.isMaxPlayer()):
+
+                print(self._board)
+                print(f"{self._currentPlayer.getName()} has won the game!")
+
+                if returnMoves:
+                    return self._moves
+                else:
+                    return 'X' if self._currentPlayer.isMaxPlayer() else 'O'
+
+            self._switchPlayer()
+        print(self._board)
+        print("The game has ended in a draw!")
+
+        return 'draw' if not returnMoves else self._moves
+
     def _switchPlayer(self):
         if self._currentPlayer == self._maxPlayer:
             self._currentPlayer = self._minPlayer
@@ -31,40 +45,21 @@ class Game:
             self._currentPlayer = self._maxPlayer
             self._currentPlayer_minimax = self._maxPlayer_minimax
 
-    def runGame(self, returnMoves : bool, hideBoard : bool):
-        for _ in range(9):
-            self._gameTurn()
-            
-            if self._board.checkWinCondition(self._currentPlayer.isMaxPlayer()):
-
-                if not hideBoard:
-                    click.clear()
-                    print(self._board)
-                    print(f"{self._currentPlayer.getName()} has won the game!")
-
-                if returnMoves:
-                    return self._moves
-                else:
-                    return 0 if self._currentPlayer.isMaxPlayer() else 1
-
-            self._switchPlayer()
-        if not hideBoard:
-            click.clear()
-            print(self._board)
-            print("The game has ended in a draw!")
-
-        return 2 if not returnMoves else self._moves
-
     def _gameTurn(self):
         if self._currentPlayer.getAi():
            self._aiTurn() 
         else:
             self._humanTurn()
-        
+    
+    def _aiTurn(self):
+        print(self._board)
+        y, x = self._currentPlayer_minimax.minimax(self._currentPlayer.getSearchDepth(), self._board, self._currentPlayer.isMaxPlayer())
+        self._board.changeSquare(y, x, self._currentPlayer.getSign())
+        self._moves.append((x,y))
+
     def _humanTurn(self):
         badInput = True
         while badInput:
-            click.clear()
             print(self._board)
             badInput = False
             try:

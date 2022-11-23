@@ -4,7 +4,7 @@ class Minimax:
     def __init__(self, searchDepth) -> None:
         self._searchDepth = searchDepth
 
-    def minmax(self, searchDepth : int, board : Board, isMaxPlayer : bool):
+    def minimax(self, searchDepth : int, board : Board, isMaxPlayer : bool):
         boardValue = board.boardState()
         if board.isTerminalState() or searchDepth == 0:
             return boardValue
@@ -12,7 +12,7 @@ class Minimax:
         
         values = []
         for successor in successors:
-            values.append(self.minmax(searchDepth - 1, successor, not isMaxPlayer))
+            values.append(self.minimax(searchDepth - 1, successor, not isMaxPlayer))
         
         if isMaxPlayer:
             finalValue = sorted(values, reverse=True)[0]
@@ -23,4 +23,4 @@ class Minimax:
             return finalValue
         else: 
             valueIndex = values.index(finalValue)
-            return board.getCoords(valueIndex)
+            return board.nthEmptySpace(valueIndex)
