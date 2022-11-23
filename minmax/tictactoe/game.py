@@ -4,7 +4,7 @@ from .minmax import Minimax
 import click
 
 class Game:
-    def __init__(self, player1 : Player, player2 : Player, searchDepth):
+    def __init__(self, player1 : Player, player2 : Player):
         self._board = Board()
         self._maxPlayer = player1 if player1.isMaxPlayer() else player2
         self._minPlayer = player2 if player1.isMaxPlayer() else player1
@@ -19,7 +19,7 @@ class Game:
         self._moves = []
 
     def _aiTurn(self):
-        y, x = self._minimax.minmax(self._searchDepth, self._board, self._currentPlayer.isMaxPlayer())
+        y, x = self._currentPlayer_minimax.minmax(self._currentPlayer.getSearchDepth(), self._board, self._currentPlayer.isMaxPlayer())
         self._board.changeSquare(y, x, self._currentPlayer.getSign())
         self._moves.append((x,y))
     

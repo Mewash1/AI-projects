@@ -3,12 +3,12 @@ from tictactoe.player import Player
 
 if __name__ == "__main__":
     depthsScores = []
-    for searchDepth in [9]:
-        player1 = Player(maxPlayer=True, ai=False, name="Max", searchDepth=searchDepth), 
+    for searchDepth in [3]:
+        player1 = Player(maxPlayer=True, ai=True, name="Max", searchDepth=searchDepth)
         player2 = Player(maxPlayer=False, ai=False, name="Min", searchDepth=searchDepth)
 
-        game = Game(player1, player2, searchDepth)
-        depthsScores.append((searchDepth, game.runGame(False, True)))
+        game = Game(player1, player2)
+        depthsScores.append((searchDepth, game.runGame(False, False)))
     print(depthsScores)
 
 
