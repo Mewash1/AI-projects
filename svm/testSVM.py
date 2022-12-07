@@ -2,7 +2,7 @@ import numpy as np
 from wineProcessing import *
 from svm import SVM
 
-def testForWineType(trainingSize, testSize, dimensions, lambdaVar):
+def testForWineType(trainingSize, testSize, lambdaVar, delta):
     redWines = processWineType("winequality-red.csv", isRed=True)
     whiteWines = processWineType("winequality-white.csv", isRed=False)
     allWines = np.concatenate((redWines, whiteWines))
@@ -11,11 +11,11 @@ def testForWineType(trainingSize, testSize, dimensions, lambdaVar):
     allWines = allWines[trainingSize:]
     testSet = allWines[:testSize]
 
-    svm = SVM(lambdaVar=lambdaVar, trainingSet=trainingSet, testSet=testSet, delta=0, startingWeight=np.array([1]*(dimensions+1)))
-    svm.learnLin()
-    svm.test()
+    svm = SVM(lambdaVar=lambdaVar, trainingSet=trainingSet, testSet=testSet, delta=delta, startingAlpha=np.array([1]*(len(trainingSet))))
+    svm.learnPolynomialKernel()
+    return svm.test()
 
-def testForQuality(trainingSize, testSize, dimensions, lambdaVar):
+def testForQuality(trainingSize, testSize, lambdaVar, delta, RBF=True):
     redWines = processWineQuality("winequality-red.csv")
     whiteWines = processWineQuality("winequality-white.csv")
     allWines = np.concatenate((redWines, whiteWines))
@@ -24,10 +24,30 @@ def testForQuality(trainingSize, testSize, dimensions, lambdaVar):
     allWines = allWines[trainingSize:]
     testSet = allWines[:testSize]
 
-    svm = SVM(lambdaVar=lambdaVar, trainingSet=trainingSet, testSet=testSet, delta=0, startingWeight=np.array([1]*(dimensions+1)))
-    svm.learnLin()
-    svm.test()
+    svm = SVM(lambdaVar=lambdaVar, trainingSet=trainingSet, testSet=testSet, delta=delta, startingAlpha=np.array([1]*(len(trainingSet))))
+    if RBF:
+        svm.learnRBFkernel()
+    else:
+        svm.learnPolynomialKernel()
+    return svm.test()
 
 if __name__ == "__main__":
-    #testForWineType(trainingSize=100, testSize=5000, dimensions=12, lambdaVar=0.01)
-    testForQuality(trainingSize=100, testSize=2000, dimensions=11, lambdaVar=0.01)
+    n = 10
+    outputString = "RBF Kernel: \n\n"
+    for lambdaVar in [0.01]:
+        for delta in [1]:
+            percents = []
+            for i in range(n):
+                percents.append(testForQuality(trainingSize=10, testSize=6000, lambdaVar=0.01, delta=delta))
+            outputString += f"lambda={lambdaVar}, delta={delta}, effiency={round(sum(percents)/n, 2)}%\n"
+
+    outputString += "Polynomial kernel: \n\n"
+    for lambdaVar in [0.01]:
+        for delta in [1]:
+            percents = []
+            for i in range(n):
+                percents.append(testForQuality(trainingSize=10, testSize=6000, lambdaVar=0.01, delta=delta, RBF=False))
+            outputString += f"lambda={lambdaVar}, delta={delta}, effiency={round(sum(percents)/n, 2)}%\n"
+
+    with open("results1.txt", 'w') as file:
+        file.write(outputString)
