@@ -18,10 +18,10 @@ def processWineType(file, isRed=True):
         points = [(entry, wineClass) for entry in points]
         return np.array(points, dtype=object)
 
-def processWineQuality(file):
+def processWineQuality(file, delimiter):
     points = processWine(file)
     pointsWithQuality = []
     for point in points:
-        quality = -1 if point[-1] <= 3 else 1
+        quality = -1 if point[-1] <= delimiter else 1
         pointsWithQuality.append((point[:-1], quality))
     return np.array(pointsWithQuality, dtype=object)
