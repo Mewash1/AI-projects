@@ -14,7 +14,7 @@ class LabFunc:
             y += pow(self.alpha, i/self.n - 1) * pow(x[i], 2)
         return y
 
-def gradientDescent(f, x0, lengthFactor, maxSteps):
+def gradientDescent(f, x0):
     localLengthFactor = lengthFactor
     old_x = x0
     gradFunc = grad(f)
