@@ -23,7 +23,7 @@ class Q_learning:
     def generateTable(self):
         Q_dict = dict()
         for i in range(500):
-            Q_dict[i] = [0 for _ in range(6)]
+            Q_dict[i] = [random.uniform(-1, 1) for _ in range(6)]
         return Q_dict
     
     def greedyChoice(self, state):
@@ -59,9 +59,16 @@ class Q_learning:
         moveProb = []
         denominator = 0
         for qvalue in moves:
-            denominator += math.exp((qvalue)/self.tau)
+            try:
+                denominator += math.exp((qvalue)/self.tau)
+            except OverflowError:
+                denominator = float('inf')
+                break
         for qvalue in moves:
-            moveProb.append(math.exp((qvalue)/self.tau)/denominator)
+            try:
+                moveProb.append(math.exp((qvalue)/self.tau)/denominator)
+            except OverflowError:
+                moveProb.append(0.0)
         values = [0,1,2,3,4,5]
         return random.choices(values, moveProb)[0]
 
