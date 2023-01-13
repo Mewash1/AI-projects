@@ -1,7 +1,7 @@
 import random
 import json
 import os
-import math
+import numpy as np
 
 class Q_learning:
     def __init__(self, initial_value, learning_rate, env, discount_factor, from_jason=False, epsilon=1, tau=1):
@@ -15,31 +15,22 @@ class Q_learning:
         self.discount_factor = discount_factor
         self.epsilon = epsilon
         self.tau = tau
-        self.movesCount = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0}
+        self.movesCount = np.zeros(6)
     
     def resetTable(self):
         self.table = self.generateTable()
 
     def generateTable(self):
-        Q_dict = dict()
-        for i in range(500):
-            Q_dict[i] = [random.uniform(-1, 1) for _ in range(6)]
-        return Q_dict
+        Q_dict = []
+        for _ in range(500):
+            Q_dict.append(np.array([random.uniform(-1, 1) for _ in range(6)]))
+        return np.array(Q_dict)
     
     def greedyChoice(self, state):
         """
         Choose action that has the higest Q-value.
         """
-        moves = self.table[state]
-        maxMove = max(moves)
-        goodMoves = []
-        for i, move in enumerate(moves):
-            if move == maxMove:
-                goodMoves.append(i)
-        if len(goodMoves) == 0:
-            return 0
-        else:
-            return random.choice(goodMoves)
+        return np.argmax(self.table[state])
     
     def epsilonGreedyChoice(self, state):
         """
@@ -56,35 +47,23 @@ class Q_learning:
         Choose action with probability from Boltzmann distribution.
         """
         moves = self.table[state]
-        moveProb = []
-        denominator = 0
-        for qvalue in moves:
-            try:
-                denominator += math.exp((qvalue)/self.tau)
-            except OverflowError:
-                denominator = float('inf')
-                break
-        for qvalue in moves:
-            try:
-                moveProb.append(math.exp((qvalue)/self.tau)/denominator)
-            except OverflowError:
-                moveProb.append(0.0)
-        values = [0,1,2,3,4,5]
-        return random.choices(values, moveProb)[0]
+        exped = np.exp(moves)
+        denominator = np.sum(np.divide(exped, self.tau))
+        moveProb = np.divide(exped, denominator)
+        return random.choices(range(6), moveProb)[0]
 
     def countChoice(self, state):
         """
-        Choose action that has been chosen the least amount of times.
+        Choose action that has been chosen the least amount of times 20% of the time.
+        Else, choose greedily.
         """
-        minMove = min(self.movesCount.values())
-        goodMoves = []
-        for key, value in self.movesCount.items():
-            if value == minMove:
-                goodMoves.append(key)
-        choice = random.choice(goodMoves)
-        self.movesCount[choice] += 1
-        print(choice)
-        return choice
+        choice = random.uniform(0,1)
+        if choice >= 0.2:
+            move = self.greedyChoice(state)
+        else:
+            move = np.argmin(self.movesCount)
+        self.movesCount[move] += 1
+        return move
     
     def trainGreedy(self, episodes, turns):
         """
