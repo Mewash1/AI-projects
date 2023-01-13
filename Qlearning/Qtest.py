@@ -27,7 +27,7 @@ def test_greedy():
         ax.plot(episodesList, results, label=f"learning rate = {learning_rate}")
         ax.legend()
     ax.set_title("Greedy strategy")
-    fig.savefig("graphs/greedy", dpi=400)
+    fig.savefig("graphs/greedy1", dpi=400)
     envi.close()
 
 def test_epsilon_greedy():
@@ -122,10 +122,10 @@ def test_count():
     envi.close()
 
 if __name__ == "__main__":
-    test_boltzmann()
+    #test_boltzmann()
     test_greedy()
-    test_epsilon_greedy()
-    test_count()
+    #test_epsilon_greedy()
+    #test_count()
     '''envi = gym.make('Taxi-v3')
     Q_learn = Q_learning(initial_value=0, learning_rate=0.5, env=envi, discount_factor=0.2)
     Q_learn.train(5000, 50, "greedy")
