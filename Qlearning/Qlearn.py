@@ -2,13 +2,14 @@ import random
 import json
 import os
 import numpy as np
+from collections import namedtuple
 
 class Q_learning:
     def __init__(self, initial_value, learning_rate, env, discount_factor, from_jason=False, epsilon=1, tau=1):
         self.initial_value = initial_value
         self.learning_rate = learning_rate
         if from_jason and os.path.isfile("qtable.json"):
-            self.table = self.getTable()
+            self.table = self.loadTable("qtable.json")
         else:
             self.table = self.generateTable()
         self.env = env
@@ -47,9 +48,8 @@ class Q_learning:
         Choose action with probability from Boltzmann distribution.
         """
         moves = self.table[state]
-        exped = np.exp(moves)
-        denominator = np.sum(np.divide(exped, self.tau))
-        moveProb = np.divide(exped, denominator)
+        denominator = np.sum(np.exp(moves)/self.tau)
+        moveProb = np.exp(moves)/denominator
         return random.choices(range(6), moveProb)[0]
 
     def countChoice(self, state):
@@ -65,37 +65,20 @@ class Q_learning:
         self.movesCount[move] += 1
         return move
     
-    def trainGreedy(self, episodes, turns):
-        """
-        Train the model using greedy algorithim.
-        """
+    def train(self, episodes, turns, strategy):
+        pickMove = None
+        if strategy == "greedy":
+            pickMove = self.greedyChoice
+        elif strategy == "epsilonGreedy":
+            pickMove = self.epsilonGreedyChoice
+        elif strategy == "boltzmann":
+            pickMove = self.boltzmannChoice
+        elif strategy == "count":
+            pickMove = self.countChoice
+        else:
+            raise ValueError("this strategy does not exist")
         for _ in range(episodes):
-            self.episode(turns, self.greedyChoice)
-    
-    def trainEpsilonGreedy(self, episodes, turns, epsilon=None):
-        """
-        Train the model using epsilon greedy algorithim.
-        """
-        if epsilon is not None and epsilon <= 1 and epsilon >= 0:
-            self.epsilon = epsilon
-        for _ in range(episodes):
-            self.episode(turns, self.epsilonGreedyChoice)
-    
-    def trainBoltzmann(self, episodes, turns, tau=None):
-        """
-        Train the model using Boltzmann distribution.
-        """
-        if tau is not None:
-            self.tau = tau
-        for _ in range(episodes):
-            self.episode(turns, self.boltzmannChoice)
-    
-    def trainCount(self, episodes, turns):
-        """
-        Train the model using counting algorithim.
-        """
-        for _ in range(episodes):
-            self.episode(turns, self.countChoice)
+            self.episode(turns, pickMove)
     
     def episode(self, turns, pickMove):
         observation_old, info = self.env.reset()
@@ -108,15 +91,24 @@ class Q_learning:
                 break
     
     def test(self, episodes, turns, useGreedy=False, useEpsilonGreedy=False, useBoltzmann=False, useCount=False):
+        """
+        Runs the algorithm without modyfing the Qtable. Depending on the function parameters,
+        it is possible to use every strategy for testing the environment.
+        Results may vary.
+        """
         results = dict()
-        strategies = [self.greedyChoice, self.epsilonGreedyChoice, self.boltzmannChoice, self.countChoice]
-        useStrategy = [useGreedy, useEpsilonGreedy, useBoltzmann, useCount]
-        names = ["greedy", "epsilonGreedy", "boltzmann", "count"]
-        for i in range(len(strategies)):
-            if useStrategy[i] is True:
+        Strategy = namedtuple('Strategy', ['use', 'f'])
+        strategies = {
+            "greedy" : Strategy(useGreedy, self.greedyChoice),
+            "epsilonGreedy" : Strategy(useEpsilonGreedy, self.epsilonGreedyChoice),
+            "boltzmann" : Strategy(useBoltzmann, self.boltzmannChoice),
+            "count" : Strategy(useCount, self.countChoice)
+        }
+        for name, strategy in strategies.items():
+            if strategy.use is True:
                 miniResults = {"positive":0, "negative":0, "average":0}
                 for _ in range(episodes):
-                    wasAchieved, numOfTurns = self.episodeTest(turns, strategies[i])
+                    wasAchieved, numOfTurns = self.episodeTest(turns, strategy.f)
                     if wasAchieved:
                         miniResults["positive"] += 1
                         miniResults["average"] += numOfTurns
@@ -126,7 +118,7 @@ class Q_learning:
                     miniResults["average"] = miniResults["average"] / miniResults["positive"]
                 else:
                     miniResults["average"] = 0
-                results[f"{names[i]}"] = miniResults
+                results[f"{name}"] = miniResults
         return results
                 
     def episodeTest(self, turns, pickMove):
@@ -145,14 +137,10 @@ class Q_learning:
         return (False, turns)
 
     def saveTable(self):
-        jstring = json.dumps(self.table)
+        jstring = json.dumps(self.table.tolist())
         with open("qtable.json", 'w') as file:
             file.write(jstring)
     
-    def getTable(self):
-        with open("qtable.json", 'r') as file:
-            table = json.load(file)
-            newTable = dict()
-            for key, value in table.items():
-                newTable[int(key)] = value
-        return newTable
+    def loadTable(self, path):
+        with open(path, 'r') as file:
+            return np.array(json.load(file))
