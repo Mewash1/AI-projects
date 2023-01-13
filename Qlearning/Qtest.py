@@ -9,7 +9,7 @@ def test_greedy():
     moves = 50
     test_moves = 50
     learning_rates = [0.1,0.3,0.5,0.7,1,5]
-    Q_learn = Q_learning(initial_value=0, learning_rate=0.5, env=envi, discount_factor=0.1, from_jason=False, tau=0.0000000000001)
+    Q_learn = Q_learning(initial_value=0, learning_rate=0.5, env=envi, discount_factor=0.9, from_jason=False, tau=0.0000000000001)
     fig, ax = plt.subplots()
     fig.set_figheight(10)
     fig.set_figwidth(20)
@@ -38,7 +38,7 @@ def test_epsilon_greedy():
     test_moves = 50
     learning_rates = [0.1,0.3,0.5,0.7,1,5]
     epsilons = [0.3, 0.5, 0.7]
-    Q_learn = Q_learning(initial_value=0, learning_rate=0.5, env=envi, discount_factor=0.1, from_jason=False, epsilon=1)
+    Q_learn = Q_learning(initial_value=0, learning_rate=0.5, env=envi, discount_factor=0.9, from_jason=False, epsilon=1)
     for epsilon in epsilons:
         Q_learn.epsilon = epsilon
         fig, ax = plt.subplots()
@@ -68,8 +68,8 @@ def test_boltzmann():
     moves = 50
     test_moves = 50
     learning_rates = [0.1,0.3,0.5,0.7,1,5]
-    taus = [0.1,1,10]
-    Q_learn = Q_learning(initial_value=0, learning_rate=0.5, env=envi, discount_factor=0.1, from_jason=False, tau=2)
+    taus = [0.1, 1, 10]
+    Q_learn = Q_learning(initial_value=0, learning_rate=0.5, env=envi, discount_factor=0.9, from_jason=False, tau=2)
 
     for tau in taus:
         Q_learn.tau = tau;
@@ -100,7 +100,7 @@ def test_count():
     moves = 50
     test_moves = 50
     learning_rates = [0.1,0.3,0.5,0.7,1,5]
-    Q_learn = Q_learning(initial_value=0, learning_rate=0.5, env=envi, discount_factor=0.1, from_jason=False)
+    Q_learn = Q_learning(initial_value=0, learning_rate=0.5, env=envi, discount_factor=0.9, from_jason=False)
     fig, ax = plt.subplots()
     fig.set_figheight(10)
     fig.set_figwidth(20)
@@ -122,17 +122,16 @@ def test_count():
     envi.close()
 
 if __name__ == "__main__":
-    #test_boltzmann()
-    test_greedy()
-    #test_epsilon_greedy()
-    #test_count()
+    test_boltzmann()
+    #test_greedy()
+    test_epsilon_greedy()
+    test_count()
     '''envi = gym.make('Taxi-v3')
-    Q_learn = Q_learning(initial_value=0, learning_rate=0.5, env=envi, discount_factor=0.2)
-    Q_learn.train(5000, 50, "greedy")
-    Q_learn.saveTable()
-
-    envi2 = gym.make('Taxi-v3', render_mode="human")
+    Q_learn = Q_learning(initial_value=0, learning_rate=0.5, env=envi, discount_factor=0.9, tau=0.1)
+    Q_learn.train(5000, 100, "boltzmann")
+    Q_learn.saveTable()'''
+    
+    '''envi2 = gym.make('Taxi-v3', render_mode="human")
+    Q_learn = Q_learning(initial_value=0, learning_rate=0.5, env=envi2, discount_factor=0.9, from_jason=True, tau=0.1)
     Q_learn.env = envi2
-    Q_learn.resetTable()
-    Q_learn.table = Q_learn.loadTable("qtable.json")
-    Q_learn.episodeTest(50, Q_learn.greedyChoice)'''
+    Q_learn.episodeTest(50, Q_learn.boltzmannChoice)'''
